@@ -35,10 +35,8 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'birth_date' => ['required', 'date'],
-            'gender' => ['required', 'in:male,female'], // tambahan gender
         ]);
 
-        // 1. Buat user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -46,14 +44,13 @@ class RegisteredUserController extends Controller
             'birth_date' => $request->birth_date,
         ]);
 
-        // 2. Buat Family record
         $family = Family::create([
             'user_id' => $user->id,
             'name' => $user->name,
             'gender' => $request->gender,
             'birth_date' => $user->birth_date,
-            'relationship_id' => null,  // bisa diisi sesuai kebutuhan
-            'parent_id' => $parentFamilyId ?? null,  // jika parent_id dikirim, gunakan; jika tidak, null
+            'relationship_id' => null,  
+            'parent_id' => $parentFamilyId ?? null,  
             'spouse_id' => null,
         ]);
 

@@ -19,6 +19,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [FamilyController::class, 'index'])->name('dashboard');
     Route::get('/family/add', [FamilyController::class, 'create'])->name('family.show');
     Route::post('/family/add', [FamilyController::class, 'store'])->name('family.store');
+    Route::get('/family/{id}/edit', [FamilyController::class, 'edit'])->name('family.edit');
+    Route::put('/family/{id}', [FamilyController::class, 'update'])->name('family.update');
 });
 
 require __DIR__ . '/auth.php';

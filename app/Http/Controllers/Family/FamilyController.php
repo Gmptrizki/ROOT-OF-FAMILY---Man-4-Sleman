@@ -14,8 +14,6 @@ use Illuminate\Support\Facades\Auth;
 class FamilyController extends Controller
 {
 
-
-
     public function index()
     {
         $rootFamily = Auth::user()->family()
@@ -26,8 +24,11 @@ class FamilyController extends Controller
             ->with(['relationship', 'spouse.relationship', 'parent.relationship'])
             ->get();
 
-        return view('family.index', compact('rootFamily', 'family'));
+        $relationships = Relationship::all();
+
+        return view('family.index', compact('rootFamily', 'family', 'relationships'));
     }
+
 
     public function show($userId)
     {
@@ -66,20 +67,46 @@ class FamilyController extends Controller
 
         return redirect()->route('dashboard')->with('success', 'Data anggota keluarga berhasil ditambahkan!');
     }
-    public function edit(string $id)
-    {
-        //
-    }
 
+    public function edit($id)
+    {
+        $rootFamily = Auth::user()->family()
+            ->with(['spouse', 'children', 'parent'])
+            ->first();
+
+        $families = Family::where('user_id', Auth::id())->get();
+        $relationships = Relationship::all();
+
+        $family = Family::findOrFail($id);
+
+        return view('family.edit', compact('rootFamily', 'families', 'family', 'relationships'));
+    }
 
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'gender' => ['required', 'in:male,female'],
+            'birth_date' => ['nullable', 'date'],
+            'relationship_id' => ['required', 'exists:relationships,id'],
+        ]);
+
+        $family = Family::findOrFail($id);
+        $family->update([
+            'name' => $request->name,
+            'gender' => $request->gender,
+            'birth_date' => $request->birth_date,
+            'relationship_id' => $request->relationship_id,
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Data anggota keluarga berhasil diperbarui!');
     }
 
 
     public function destroy(string $id)
     {
-        //
+        $family = Family::findOrFail($id);
+        $family->delete();
+        return redirect()->route('dashboard')->with('success', 'Data anggota keluarga berhasil dihapus!');
     }
 }

@@ -22,14 +22,12 @@ class User extends Authenticatable
     protected static function booted()
     {
         static::created(function ($user) {
-            // Buat Family record otomatis
             $family = Family::create([
                 'user_id' => $user->id,
                 'name' => $user->name,
-                'gender' => null,         // bisa diisi jika ingin
                 'birth_date' => $user->birth_date,
                 'relationship_id' => null,
-                'parent_id' => null,      // sementara root -> parent_id null
+                'parent_id' => null,      
                 'spouse_id' => null,
             ]);
 
