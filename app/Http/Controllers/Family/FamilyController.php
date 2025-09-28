@@ -32,8 +32,8 @@ class FamilyController extends Controller
 
         $father      = $relations->get(1);
         $mother      = $relations->get(2);
-        $grandFather = $relations->get(3);
-        $grandMother = $relations->get(4);
+        $grandfa = $relations->get(3);
+        $grandmom = $relations->get(4);
         $brother     = $relations->get(5);
         $sister      = $relations->get(6);
 
@@ -45,8 +45,8 @@ class FamilyController extends Controller
             'relationships',
             'father',
             'mother',
-            'grandFather',
-            'grandMother',
+            'grandfa',
+            'grandmom',
             'brother',
             'sister'
         ));

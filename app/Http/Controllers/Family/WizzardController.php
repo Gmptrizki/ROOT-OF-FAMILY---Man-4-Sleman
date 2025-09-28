@@ -7,6 +7,8 @@ use App\Models\Family;
 use App\Models\Relationship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+
 
 class WizzardController extends Controller
 {
@@ -28,20 +30,29 @@ class WizzardController extends Controller
             'birth_date' => 'nullable|date',
             'status'     => 'nullable|string',
             'notes'      => 'nullable|string',
+            'photo'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $userFamily = Family::where('user_id', Auth::id())->first();
 
-        $data = [
-            'user_id'        => Auth::id(),
-            'name'           => $validated['name'],
-            'birth_date'     => $validated['birth_date'] ?? null,
-            'status'         => $validated['status'] ?? null,
-            'note'           => $validated['notes'] ?? null,
-            'relationship_id' => 1,
-            'parent_id'       => $userFamily ? $userFamily->parent_id : null,
-        ];
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
 
+            $photoName = 'father_' . time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+            $photoPath = $photo->storeAs('family-photos', $photoName, 'public');
+        }
+
+        $data = [
+            'user_id'          => Auth::id(),
+            'name'             => $validated['name'],
+            'birth_date'       => $validated['birth_date'] ?? null,
+            'status'           => $validated['status'] ?? null,
+            'note'             => $validated['notes'] ?? null,
+            'relationship_id'  => $relationship->id,
+            'photo'            => $photoPath,
+            'parent_id'        => $userFamily ? $userFamily->parent_id : null,
+        ];
 
         Family::create($data);
 
@@ -55,7 +66,7 @@ class WizzardController extends Controller
 
     public function storeMother(Request $request)
     {
-        $relationship = Relationship::where('code', 'father')->first();
+        $relationship = Relationship::where('code', 'mother')->first();
 
         if (!$relationship) {
             return redirect()->back()->with('error', 'Relationship Ibu belum tersedia di database.');
@@ -66,20 +77,29 @@ class WizzardController extends Controller
             'birth_date' => 'nullable|date',
             'status'     => 'nullable|string',
             'notes'      => 'nullable|string',
+            'photo'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $userFamily = Family::where('user_id', Auth::id())->first();
 
-        $data = [
-            'user_id'        => Auth::id(),
-            'name'           => $validated['name'],
-            'birth_date'     => $validated['birth_date'] ?? null,
-            'status'         => $validated['status'] ?? null,
-            'note'           => $validated['notes'] ?? null,
-            'relationship_id' => 2,
-            'parent_id'       => $userFamily ? $userFamily->parent_id : null,
-        ];
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
 
+            $photoName = 'mother' . time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+            $photoPath = $photo->storeAs('family-photos', $photoName, 'public');
+        }
+
+        $data = [
+            'user_id'          => Auth::id(),
+            'name'             => $validated['name'],
+            'birth_date'       => $validated['birth_date'] ?? null,
+            'status'           => $validated['status'] ?? null,
+            'note'             => $validated['notes'] ?? null,
+            'relationship_id'  => $relationship->id,
+            'photo'            => $photoPath,
+            'parent_id'        => $userFamily ? $userFamily->parent_id : null,
+        ];
 
         Family::create($data);
 
@@ -92,12 +112,12 @@ class WizzardController extends Controller
     }
 
 
-    public function storeGrandfa(Request $request)
+    public function storeGrandFa(Request $request)
     {
-        $relationship = Relationship::where('code', 'father')->first();
+        $relationship = Relationship::where('code', 'grandfa')->first();
 
         if (!$relationship) {
-            return redirect()->back()->with('error', 'Relationship Kakek belum tersedia di database.');
+            return redirect()->back()->with('error', 'Relationship Ibu belum tersedia di database.');
         }
 
         $validated = $request->validate([
@@ -105,20 +125,29 @@ class WizzardController extends Controller
             'birth_date' => 'nullable|date',
             'status'     => 'nullable|string',
             'notes'      => 'nullable|string',
+            'photo'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $userFamily = Family::where('user_id', Auth::id())->first();
 
-        $data = [
-            'user_id'        => Auth::id(),
-            'name'           => $validated['name'],
-            'birth_date'     => $validated['birth_date'] ?? null,
-            'status'         => $validated['status'] ?? null,
-            'note'           => $validated['notes'] ?? null,
-            'relationship_id' => 3,
-            'parent_id'       => $userFamily ? $userFamily->parent_id : null,
-        ];
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
 
+            $photoName = 'grandfa' . time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+            $photoPath = $photo->storeAs('family-photos', $photoName, 'public');
+        }
+
+        $data = [
+            'user_id'          => Auth::id(),
+            'name'             => $validated['name'],
+            'birth_date'       => $validated['birth_date'] ?? null,
+            'status'           => $validated['status'] ?? null,
+            'note'             => $validated['notes'] ?? null,
+            'relationship_id'  => $relationship->id,
+            'photo'            => $photoPath,
+            'parent_id'        => $userFamily ? $userFamily->parent_id : null,
+        ];
 
         Family::create($data);
 
@@ -133,7 +162,7 @@ class WizzardController extends Controller
 
     public function storeGrandMom(Request $request)
     {
-        $relationship = Relationship::where('code', 'father')->first();
+        $relationship = Relationship::where('code', 'grandmom')->first();
 
         if (!$relationship) {
             return redirect()->back()->with('error', 'Relationship Nenek belum tersedia di database.');
@@ -144,20 +173,29 @@ class WizzardController extends Controller
             'birth_date' => 'nullable|date',
             'status'     => 'nullable|string',
             'notes'      => 'nullable|string',
+            'photo'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $userFamily = Family::where('user_id', Auth::id())->first();
 
-        $data = [
-            'user_id'        => Auth::id(),
-            'name'           => $validated['name'],
-            'birth_date'     => $validated['birth_date'] ?? null,
-            'status'         => $validated['status'] ?? null,
-            'note'           => $validated['notes'] ?? null,
-            'relationship_id' => 4,
-            'parent_id'       => $userFamily ? $userFamily->parent_id : null,
-        ];
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
 
+            $photoName = 'grandmom' . time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+            $photoPath = $photo->storeAs('family-photos', $photoName, 'public');
+        }
+
+        $data = [
+            'user_id'          => Auth::id(),
+            'name'             => $validated['name'],
+            'birth_date'       => $validated['birth_date'] ?? null,
+            'status'           => $validated['status'] ?? null,
+            'note'             => $validated['notes'] ?? null,
+            'relationship_id'  => $relationship->id,
+            'photo'            => $photoPath,
+            'parent_id'        => $userFamily ? $userFamily->parent_id : null,
+        ];
 
         Family::create($data);
 
@@ -171,10 +209,10 @@ class WizzardController extends Controller
 
     public function storeBrother(Request $request)
     {
-        $relationship = Relationship::where('code', 'father')->first();
+        $relationship = Relationship::where('code', 'brother')->first();
 
         if (!$relationship) {
-            return redirect()->back()->with('error', 'Relationship Saudara Laki-Laki belum tersedia di database.');
+            return redirect()->back()->with('error', 'Relationship Ibu belum tersedia di database.');
         }
 
         $validated = $request->validate([
@@ -182,24 +220,33 @@ class WizzardController extends Controller
             'birth_date' => 'nullable|date',
             'status'     => 'nullable|string',
             'notes'      => 'nullable|string',
+            'photo'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $userFamily = Family::where('user_id', Auth::id())->first();
 
-        $data = [
-            'user_id'        => Auth::id(),
-            'name'           => $validated['name'],
-            'birth_date'     => $validated['birth_date'] ?? null,
-            'status'         => $validated['status'] ?? null,
-            'note'           => $validated['notes'] ?? null,
-            'relationship_id' => 5,
-            'parent_id'       => $userFamily ? $userFamily->parent_id : null,
-        ];
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
 
+            $photoName = 'brother' . time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+            $photoPath = $photo->storeAs('family-photos', $photoName, 'public');
+        }
+
+        $data = [
+            'user_id'          => Auth::id(),
+            'name'             => $validated['name'],
+            'birth_date'       => $validated['birth_date'] ?? null,
+            'status'           => $validated['status'] ?? null,
+            'note'             => $validated['notes'] ?? null,
+            'relationship_id'  => $relationship->id,
+            'photo'            => $photoPath,
+            'parent_id'        => $userFamily ? $userFamily->parent_id : null,
+        ];
 
         Family::create($data);
 
-        return redirect()->route('dashboard.wizzard.sister')->with('success', 'Data Saudara Laki-Laki berhasil disimpan!');
+        return redirect()->route('family.create.sister')->with('success', 'Data Saudara Laki-Laki berhasil disimpan!');
     }
 
 
@@ -210,7 +257,7 @@ class WizzardController extends Controller
 
     public function storeSister(Request $request)
     {
-        $relationship = Relationship::where('code', 'father')->first();
+        $relationship = Relationship::where('code', 'sister')->first();
 
         if (!$relationship) {
             return redirect()->back()->with('error', 'Relationship Saudara Perempuan belum tersedia di database.');
@@ -221,20 +268,28 @@ class WizzardController extends Controller
             'birth_date' => 'nullable|date',
             'status'     => 'nullable|string',
             'notes'      => 'nullable|string',
+            'photo'      => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $userFamily = Family::where('user_id', Auth::id())->first();
 
-        $data = [
-            'user_id'        => Auth::id(),
-            'name'           => $validated['name'],
-            'birth_date'     => $validated['birth_date'] ?? null,
-            'status'         => $validated['status'] ?? null,
-            'note'           => $validated['notes'] ?? null,
-            'relationship_id' => 6,
-            'parent_id'       => $userFamily ? $userFamily->parent_id : null,
-        ];
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $photoName = 'sister' . time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+            $photoPath = $photo->storeAs('family-photos', $photoName, 'public');
+        }
 
+        $data = [
+            'user_id'          => Auth::id(),
+            'name'             => $validated['name'],
+            'birth_date'       => $validated['birth_date'] ?? null,
+            'status'           => $validated['status'] ?? null,
+            'note'             => $validated['notes'] ?? null,
+            'relationship_id'  => $relationship->id,
+            'photo'            => $photoPath,
+            'parent_id'        => $userFamily ? $userFamily->parent_id : null,
+        ];
 
         Family::create($data);
 

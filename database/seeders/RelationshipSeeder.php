@@ -17,8 +17,8 @@ class RelationshipSeeder extends Seeder
             ['code' => 'father', 'label' => 'Ayah'],
             ['code' => 'mother', 'label' => 'Ibu'],
 
-            ['code' => 'grandfather', 'label' => 'Kakek'],
-            ['code' => 'grandmother', 'label' => 'Nenek'],
+            ['code' => 'grandfa', 'label' => 'Kakek'],
+            ['code' => 'grandma', 'label' => 'Nenek'],
 
             ['code' => 'brother', 'label' => 'Saudara Laki-Laki'],
             ['code' => 'sister', 'label' => 'Saudara Perempuan'],
