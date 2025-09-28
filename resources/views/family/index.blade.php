@@ -1,289 +1,412 @@
-<x-app-layout>
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pohon Keluarga - Man 4 Sleman</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
+        /* Styling untuk pohon keluarga */
         .tree-container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin-bottom: 30px;
-            overflow-x: auto;
+            position: relative;
+            padding: 20px 0;
         }
 
-        .tree {
+        .tree ul {
+            padding-top: 40px;
+            position: relative;
+            transition: all 0.5s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 500px;
-            position: relative;
         }
 
-        .generation {
+        .tree li {
+            text-align: center;
+            list-style-type: none;
+            position: relative;
+            padding: 40px 10px 0 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tree li::before,
+        .tree li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 50%;
+            border-top: 3px solid #94a3b8;
+            width: 50%;
+            height: 40px;
+        }
+
+        .tree li::after {
+            right: auto;
+            left: 50%;
+            border-left: 3px solid #94a3b8;
+        }
+
+        .tree li:only-child::after,
+        .tree li:only-child::before {
+            display: none;
+        }
+
+        .tree li:only-child {
+            padding-top: 0;
+        }
+
+        .tree li:first-child::before,
+        .tree li:last-child::after {
+            border: 0 none;
+        }
+
+        .tree li:last-child::before {
+            border-right: 3px solid #94a3b8;
+            border-radius: 0 5px 0 0;
+        }
+
+        .tree li:first-child::after {
+            border-radius: 5px 0 0 0;
+        }
+
+        .tree ul ul::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            border-left: 3px solid #94a3b8;
+            width: 0;
+            height: 40px;
+        }
+
+        .person {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #1e293b;
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            font-weight: 500;
+            min-width: 180px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .person:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .person.male {
+            background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+            border-color: #3b82f6;
+        }
+
+        .person.female {
+            background: linear-gradient(135deg, #fce7f3 0%, #fdf2f8 100%);
+            border-color: #ec4899;
+        }
+
+        .person.child {
+            margin-top: 15px;
+        }
+
+        .name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .relationship {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .connector {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 40px;
+            background-color: #94a3b8;
+            z-index: 1;
+        }
+
+        .parents {
             display: flex;
             justify-content: center;
-            width: 100%;
-            margin-bottom: 60px;
+            gap: 60px;
             position: relative;
+            margin-bottom: 40px;
         }
 
-        .family-member {
-            background-color: #fff;
-            border: 2px solid #3498db;
-            border-radius: 10px;
-            padding: 15px;
-            width: 200px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            position: relative;
-            z-index: 2;
-            margin: 0 10px;
+        .children {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+            flex-wrap: wrap;
         }
 
-        .family-member:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        /* Responsif untuk perangkat kecil */
+        @media (max-width: 768px) {
+            .tree li {
+                padding: 30px 5px 0 5px;
+            }
+
+            .person {
+                min-width: 140px;
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+
+            .parents {
+                flex-direction: column;
+                gap: 20px !important;
+            }
+
+            .children {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .tree li::before,
+            .tree li::after {
+                height: 30px;
+            }
         }
 
-        .family-member.current-user {
-            background-color: #fff3cd;
-            border-color: #ffc107;
+        /* Styling untuk placeholder jika data belum diisi */
+        .person.placeholder {
+            background-color: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            color: #64748b;
         }
 
-        .member-photo {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 0 auto 10px;
-            border: 3px solid #3498db;
-        }
-
-        .member-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #2c3e50;
-        }
-
-        .current-user-badge {
-            background-color: #ffc107;
-            color: #856404;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-left: 5px;
-        }
-
-        .member-details {
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .relationship-code {
-            margin-top: 5px;
-            font-size: 0.75rem;
-            color: #3498db;
-            font-weight: bold;
-        }
-
-        .actions {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            margin: 0 10px;
-        }
-
-        .btn:hover {
-            background-color: #2980b9;
-        }
-
-        .btn-add {
-            background-color: #2ecc71;
-        }
-
-        .btn-add:hover {
-            background-color: #27ae60;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-        }
-
-        .edit-form {
-            background: #fefefe;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 30px;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .edit-form h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-
-        .edit-form label {
-            font-weight: 600;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .edit-form input,
-        .edit-form select {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
-        .edit-form button {
-            background: #3498db;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .edit-form button:hover {
-            background: #2980b9;
+        .person.placeholder .name {
+            color: #64748b;
+            font-style: italic;
         }
     </style>
+</head>
 
-    <div class="container">
-        <div class="header">
-            <h1>Pohon Keluarga</h1>
-            <p>Visualisasi hubungan keluarga dalam bentuk pohon silsilah</p>
+<body class="bg-gray-50">
+    <x-app-layout>
+        <div class="container mx-auto px-4 py-8">
+
+            <div class="flex justify-between items-center mb-8">
+                <div class="header text-left">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Pohon Keluarga</h1>
+                    <p class="text-gray-600 max-w-2xl">
+                        Visualisasi hubungan keluarga dalam bentuk pohon silsilah yang menunjukkan hubungan antar
+                        anggota keluarga.
+                    </p>
+                </div>
+
+                <div class="flex gap-4">
+                    <a href="{{route('family.create.brother')}}"
+                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded shadow">
+                        Tambah Anggota
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <div class="tree-container">
+                    <div class="tree">
+                        <ul>
+                            <li>
+                                <div class="family">
+                                    <div class="parents">
+                                        @if(!empty($grandFather?->name))
+                                        <div class="person male hover-highlight">
+                                            <div class="name">
+                                                {{ collect(explode(' ', $grandFather->name))->take(2)->implode(' ') }}
+                                            </div>
+                                            <div class="relationship">
+                                                {{ $grandFather->relationship->label }}
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        @if(!empty($grandMother?->name))
+                                        <div class="person female hover-highlight">
+                                            <div class="name">
+                                                {{ collect(explode(' ', $grandMother->name))->take(2)->implode(' ') }}
+                                            </div>
+                                            <div class="relationship">
+                                                {{ $grandMother->relationship->label }}
+                                            </div>
+                                        </div>
+                                        @endif
+                                    </div>
+
+                                    <ul>
+                                        <li>
+                                            <div class="family">
+                                                <div class="parents">
+                                                    @if(!empty($father?->name))
+                                                    <div class="person male hover-highlight">
+                                                        <div class="name">
+                                                            {{ collect(explode(' ', $father->name))->take(2)->implode('
+                                                            ') }}
+                                                        </div>
+                                                        <div class="relationship">
+                                                            {{ $father->relationship->label }}
+                                                        </div>
+                                                    </div>
+                                                    @endif
+
+                                                    @if(!empty($mother?->name))
+                                                    <div class="person female hover-highlight">
+                                                        <div class="name">
+                                                            {{ collect(explode(' ', $mother->name))->take(2)->implode('
+                                                            ') }}
+                                                        </div>
+                                                        <div class="relationship">
+                                                            {{ $mother->relationship->label }}
+                                                        </div>
+                                                    </div>
+                                                    @endif
+
+                                                    <div class="connector"></div>
+                                                </div>
+
+                                                <div class="children flex gap-4 mt-4">
+                                                    <!-- Anda -->
+                                                    <div class="person child male hover-highlight">
+                                                        <div class="name">
+                                                            {{ collect(explode(' ',
+                                                            $rootFamily->name))->take(2)->implode(' ') }}
+                                                        </div>
+                                                        <div class="relationship">Anda</div>
+                                                    </div>
+
+                                                    @if(!empty($brother?->name))
+                                                    <div class="person child male hover-highlight">
+                                                        <div class="name">
+                                                            {{ collect(explode(' ', $brother->name))->take(2)->implode('
+                                                            ') }}
+                                                        </div>
+                                                        <div class="relationship">
+                                                            {{ $brother->relationship->label }}
+                                                        </div>
+                                                    </div>
+                                                    @endif
+
+                                                    @if(!empty($sister?->name))
+                                                    <div class="person child female hover-highlight">
+                                                        <div class="name">
+                                                            {{ collect(explode(' ', $sister->name))->take(2)->implode('
+                                                            ') }}
+                                                        </div>
+                                                        <div class="relationship">
+                                                            {{ $sister->relationship->label }}
+                                                        </div>
+                                                    </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800">Daftar Anggota Keluarga</h2>
+                    <a href="{{ route('family.edit.tree') }}"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow">
+                        Edit Pohon
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @if($grandFather)
+                    <div class="flex items-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                        <div>
+                            <div class="font-medium text-gray-800">{{ $grandFather->name }}</div>
+                            <div class="text-sm text-gray-600">{{ $grandFather->relationship->label }}</div>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($grandMother)
+                    <div class="flex items-center p-4 bg-pink-50 rounded-lg border border-pink-200">
+                        <div class="w-3 h-3 bg-pink-500 rounded-full mr-3"></div>
+                        <div>
+                            <div class="font-medium text-gray-800">{{ $grandMother->name }}</div>
+                            <div class="text-sm text-gray-600">{{ $grandMother->relationship->label }}</div>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($father)
+                    <div class="flex items-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                        <div>
+                            <div class="font-medium text-gray-800">{{ $father->name }}</div>
+                            <div class="text-sm text-gray-600">{{ $father->relationship->label }}</div>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($mother)
+                    <div class="flex items-center p-4 bg-pink-50 rounded-lg border border-pink-200">
+                        <div class="w-3 h-3 bg-pink-500 rounded-full mr-3"></div>
+                        <div>
+                            <div class="font-medium text-gray-800">{{ $mother->name }}</div>
+                            <div class="text-sm text-gray-600">{{ $mother->relationship->label }}</div>
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="flex items-center p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                        <div class="w-3 h-3 bg-indigo-500 rounded-full mr-3"></div>
+                        <div>
+                            <div class="font-medium text-gray-800">{{ $rootFamily->name }}</div>
+                            <div class="text-sm text-gray-600">Anda</div>
+                        </div>
+                    </div>
+                    @if($brother)
+                    <div class="flex items-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                        <div>
+                            <div class="font-medium text-gray-800">{{ $brother->name }}</div>
+                            <div class="text-sm text-gray-600">{{ $brother->relationship->label }}</div>
+                        </div>
+                    </div>
+                    @endif
+                    @if(!empty($sister?->name))
+                    <div class="flex items-center p-4 bg-pink-50 rounded-lg border border-pink-200">
+                        <div class="w-3 h-3 bg-pink-500 rounded-full mr-3"></div>
+                        <div>
+                            <div class="font-medium text-gray-800">{{ $sister->name }}</div>
+                            <div class="text-sm text-gray-600">{{ $sister->relationship->label }}</div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
         </div>
+    </x-app-layout>
+</body>
 
-        <div class="tree-container">
-            @if($rootFamily)
-            <div class="tree">
-                <div class="generation">
-                    <div class="family-member current-user">
-                        <img src="{{ $rootFamily->photo ? asset('storage/' . $rootFamily->photo) : asset('images/default-avatar.png') }}"
-                            alt="{{ $rootFamily->name }}" class="member-photo">
-                        <div class="member-name">
-                            {{ $rootFamily->name }}
-                            <span class="current-user-badge">Anda</span>
-                        </div>
-                        <div class="member-details">
-                            <div>{{ $rootFamily->gender }}</div>
-                            <div>Lahir: {{ $rootFamily->birth_date }}</div>
-                        </div>
-                        @if($rootFamily->relationship)
-                        <div class="relationship-code">
-                            Code: {{ $rootFamily->relationship->code }}
-                        </div>
-                        <div class="text-xs text-gray-500">
-                            Label: {{ $rootFamily->relationship->label }}
-                        </div>
-                        @endif
-                    </div>
-                </div>
-
-                @if($rootFamily->spouse)
-                <div class="generation">
-                    <div class="family-member">
-                        <img src="{{ $rootFamily->spouse->photo ? asset('storage/' . $rootFamily->spouse->photo) : asset('images/default-avatar.png') }}"
-                            alt="{{ $rootFamily->spouse->name }}" class="member-photo">
-                        <div class="member-name">{{ $rootFamily->spouse->name }}</div>
-                        <div class="member-details">
-                            <div>{{ $rootFamily->spouse->gender }}</div>
-                            <div>Lahir: {{ $rootFamily->spouse->birth_date }}</div>
-                        </div>
-                        @if($rootFamily->spouse->relationship)
-                        <div class="relationship-code">
-                            Code: {{ $rootFamily->spouse->relationship->code }}
-                        </div>
-                        <div class="text-xs text-gray-500">
-                            Label: {{ $rootFamily->spouse->relationship->label }}
-                        </div>
-                        @endif
-                    </div>
-                </div>
-                @endif
-
-                @if($rootFamily->children->count() > 0)
-                <div class="generation">
-                    @foreach($rootFamily->children as $child)
-                    <div class="family-member">
-                        <img src="{{ $child->photo ? asset('storage/' . $child->photo) : asset('images/default-avatar.png') }}"
-                            alt="{{ $child->name }}" class="member-photo">
-                        <div class="member-name">{{ $child->name }}</div>
-                        <div class="member-details">
-                            <div>{{ $child->gender }}</div>
-                            <div>Lahir: {{ $child->birth_date }}</div>
-                        </div>
-                        @if($child->relationship)
-                        <div class="relationship-code">{{ $child->relationship->label }}</div>
-                        @endif
-                    </div>
-                    @endforeach
-                </div>
-                @endif
-            </div>
-            <div class="actions">
-                <a href="{{ route('family.show', $rootFamily->id) }}" class="btn btn-add">
-                    + Tambah Anggota Keluarga
-                </a>
-                <a href="{{ route('family.edit', $rootFamily->id) }}" class="btn">
-                    ✏️ Edit Data Keluarga
-                </a>
-            </div>
-
-
-            @else
-            <div class="no-data">
-                <p>Belum ada data keluarga.</p>
-                <a href="{{ route('family.show', 0) }}" class="btn btn-add">Tambah Data Pertama</a>
-            </div>
-            @endif
-        </div>
-    </div>
-</x-app-layout>
+</html>

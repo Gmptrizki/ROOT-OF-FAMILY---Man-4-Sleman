@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Family;
 use App\Http\Controllers\Controller;
 use App\Models\Family;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Relationship;
 use Illuminate\Support\Facades\Auth;
@@ -16,97 +15,144 @@ class FamilyController extends Controller
 
     public function index()
     {
+        $userId = Auth::id();
+
         $rootFamily = Auth::user()->family()
-            ->with(['relationship', 'spouse.relationship', 'children.relationship', 'parent.relationship'])
+            ->with(['relationship', 'children.relationship', 'parent.relationship'])
             ->first();
 
-        $family = Family::where('user_id', '!=', Auth::id())
-            ->with(['relationship', 'spouse.relationship', 'parent.relationship'])
+        $family = Family::where('user_id', '!=', $userId)
+            ->with(['relationship', 'parent.relationship'])
+            ->get();
+
+        $relations = Family::where('user_id', $userId)
+            ->whereIn('relationship_id', [1, 2, 3, 4, 5, 6])
+            ->get()
+            ->keyBy('relationship_id');
+
+        $father      = $relations->get(1);
+        $mother      = $relations->get(2);
+        $grandFather = $relations->get(3);
+        $grandMother = $relations->get(4);
+        $brother     = $relations->get(5);
+        $sister      = $relations->get(6);
+
+        $relationships = Relationship::all();
+
+        return view('family.index', compact(
+            'rootFamily',
+            'family',
+            'relationships',
+            'father',
+            'mother',
+            'grandFather',
+            'grandMother',
+            'brother',
+            'sister'
+        ));
+    }
+
+    public function createBrother()
+    {
+        return view('family.create-brother');
+    }
+    public function createSister()
+    {
+        return view('family.create-sister');
+    }
+
+    public function storeBrother(Request $request)
+    {
+        $validated = $request->validate([
+            'name'       => 'required|string|max:255',
+            'birth_date' => 'nullable|date',
+            'status'     => 'nullable|string',
+            'notes'      => 'nullable|string',
+        ]);
+
+        $userFamily = Family::where('user_id', Auth::id())->first();
+
+        $data = [
+            'user_id'         => Auth::id(),
+            'name'            => $validated['name'],
+            'birth_date'      => $validated['birth_date'] ?? null,
+            'status'          => $validated['status'] ?? null,
+            'note'            => $validated['notes'] ?? null,
+            'relationship_id' => 5,
+            'parent_id'       => $userFamily ? $userFamily->parent_id : null,
+        ];
+
+        Family::create($data);
+
+        return redirect()->route('family.create.sister')->with('success', 'Saudara Laki-Laki berhasil ditambahkan!');
+    }
+
+    public function storeSister(Request $request)
+    {
+        $validated = $request->validate([
+            'name'       => 'required|string|max:255',
+            'birth_date' => 'nullable|date',
+            'status'     => 'nullable|string',
+            'notes'      => 'nullable|string',
+        ]);
+
+        $userFamily = Family::where('user_id', Auth::id())->first();
+
+        $data = [
+            'user_id'         => Auth::id(),
+            'name'            => $validated['name'],
+            'birth_date'      => $validated['birth_date'] ?? null,
+            'status'          => $validated['status'] ?? null,
+            'note'            => $validated['notes'] ?? null,
+            'relationship_id' => 6,
+            'parent_id'       => $userFamily ? $userFamily->parent_id : null,
+        ];
+
+        Family::create($data);
+
+        return redirect()->route('dashboard')->with('success', 'Saudara Perempuan berhasil ditambahkan!');
+    }
+
+    public function editTree()
+    {
+        $userId = Auth::id();
+
+        $familyMembers = Family::where('user_id', $userId)
+            ->with('relationship')
             ->get();
 
         $relationships = Relationship::all();
 
-        return view('family.index', compact('rootFamily', 'family', 'relationships'));
+        return view('family.edit-tree', compact('familyMembers', 'relationships'));
     }
 
-
-    public function show($userId)
+    public function updateTree(Request $request)
     {
-        $user = User::findOrFail($userId);
-        $relationships = Relationship::all();
-        return view('family.show', compact('user', 'relationships'));
-    }
-
-
-    public function create()
-    {
-        $relationships = Relationship::all();
-        return view('family.create', compact('relationships'));
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'gender' => ['required', 'in:male,female'],
-            'birth_date' => ['nullable', 'date'],
-            'relationship_id' => ['required', 'exists:relationships,id'],
+        $validated = $request->validate([
+            'families.*.id'             => 'required|exists:families,id',
+            'families.*.name'           => 'required|string|max:255',
+            'families.*.birth_date'     => 'nullable|date',
+            'families.*.status'         => 'nullable|string',
+            'families.*.notes'          => 'nullable|string',
+            'families.*.relationship_id' => 'required|exists:relationships,id',
         ]);
 
-        $parentFamilyId = Auth::user()->family->id;
+        foreach ($validated['families'] as $data) {
+            $family = Family::where('user_id', Auth::id())
+                ->where('id', $data['id'])
+                ->first();
 
-        Family::create([
-            'user_id' => Auth::id(),
-            'name' => $request->name,
-            'gender' => $request->gender,
-            'birth_date' => $request->birth_date,
-            'relationship_id' => $request->relationship_id,
-            'parent_id' => $parentFamilyId,
-            'spouse_id' => null,
-        ]);
+            if ($family) {
+                $family->update([
+                    'name'            => $data['name'],
+                    'birth_date'      => $data['birth_date'] ?? null,
+                    'status'          => $data['status'] ?? null,
+                    'note'            => $data['notes'] ?? null,
+                    'relationship_id' => $data['relationship_id'],
+                ]);
+            }
+        }
 
-        return redirect()->route('dashboard')->with('success', 'Data anggota keluarga berhasil ditambahkan!');
-    }
-
-    public function edit($id)
-    {
-        $rootFamily = Auth::user()->family()
-            ->with(['spouse', 'children', 'parent'])
-            ->first();
-
-        $families = Family::where('user_id', Auth::id())->get();
-        $relationships = Relationship::all();
-
-        $family = Family::findOrFail($id);
-
-        return view('family.edit', compact('rootFamily', 'families', 'family', 'relationships'));
-    }
-
-    public function update(Request $request, string $id)
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'gender' => ['required', 'in:male,female'],
-            'birth_date' => ['nullable', 'date'],
-            'relationship_id' => ['required', 'exists:relationships,id'],
-        ]);
-
-        $family = Family::findOrFail($id);
-        $family->update([
-            'name' => $request->name,
-            'gender' => $request->gender,
-            'birth_date' => $request->birth_date,
-            'relationship_id' => $request->relationship_id,
-        ]);
-
-        return redirect()->route('dashboard')->with('success', 'Data anggota keluarga berhasil diperbarui!');
-    }
-
-
-    public function destroy(string $id)
-    {
-        $family = Family::findOrFail($id);
-        $family->delete();
-        return redirect()->route('dashboard')->with('success', 'Data anggota keluarga berhasil dihapus!');
+        return redirect()->route('dashboard')->with('success', 'Data keluarga berhasil diperbarui!');
     }
 }

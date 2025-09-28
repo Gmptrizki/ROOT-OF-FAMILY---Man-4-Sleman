@@ -12,11 +12,11 @@ class Family extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'gender',
         'birth_date',
         'photo',
+        'note',
+        'status',
         'parent_id',
-        'spouse_id',
         'relationship_id'
     ];
 
@@ -38,11 +38,6 @@ class Family extends Model
     public function children()
     {
         return $this->hasMany(Family::class, 'parent_id');
-    }
-
-    public function spouse()
-    {
-        return $this->belongsTo(Family::class, 'spouse_id');
     }
 
     public function siblings()

@@ -28,7 +28,6 @@ class User extends Authenticatable
                 'birth_date' => $user->birth_date,
                 'relationship_id' => null,
                 'parent_id' => null,      
-                'spouse_id' => null,
             ]);
 
             $family->parent_id = $family->id;

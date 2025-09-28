@@ -44,20 +44,10 @@ class RegisteredUserController extends Controller
             'birth_date' => $request->birth_date,
         ]);
 
-        $family = Family::create([
-            'user_id' => $user->id,
-            'name' => $user->name,
-            'gender' => $request->gender,
-            'birth_date' => $user->birth_date,
-            'relationship_id' => null,  
-            'parent_id' => $parentFamilyId ?? null,  
-            'spouse_id' => null,
-        ]);
-
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', 'Data user dan family berhasil ditambahkan!');
+        return redirect()->route('dashboard.wizzard.father')->with('success', 'Data user dan family berhasil ditambahkan!');
     }
 }
